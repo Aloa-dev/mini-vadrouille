@@ -1,0 +1,9 @@
+import { Link } from '@tanstack/react-router';
+import { Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { bookingAmounts, demoBooking, euros, journeyCopy } from '@/data/demo';
+import { JourneyShell } from './booking-journey';
+export function RequestSent() {
+ return <JourneyShell stage="sent" narrow><div className="mx-auto max-w-[600px]"><div className="text-center"><span className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-reassurance"><Check className="size-8" /></span><Badge variant="outline">Demande envoyée</Badge><h1 className="mt-4 text-3xl font-bold">Votre demande est bien envoyée !</h1><p className="mt-4 text-lg leading-relaxed text-muted-foreground">{journeyCopy.email}</p></div><section className="mt-8 space-y-3 rounded-2xl border border-border border-l-4 border-l-forest/40 p-6"><h2 className="text-xl font-bold">Récapitulatif</h2><p className="font-semibold">Kit Explorateur Curieux, chez Thomas · Bordeaux Centre</p><p className="text-muted-foreground">{demoBooking.fullDates}</p><p className="font-semibold">Total payé : {euros(bookingAmounts(true).total)} (dont {euros(demoBooking.deposit, false)} de caution remboursable)</p></section><section className="mt-5 space-y-3 rounded-2xl border border-border p-6"><h2 className="text-xl font-bold">Et maintenant ?</h2><p>Thomas reçoit votre demande.</p><p>S'il accepte, vous recevez son adresse précise et les détails de la remise.</p><p>S'il refuse ou ne répond pas sous {demoBooking.responseHours} h, vous êtes remboursé intégralement.</p></section><Button asChild variant="secondary" className="mt-8 w-full"><Link to="/mes-reservations">Voir mes réservations</Link></Button><div className="mt-4 text-center"><Link to="/recherche" className="rounded-sm text-sm underline focus-visible:outline-2 focus-visible:outline-ring">Retour aux résultats</Link></div></div></JourneyShell>;
+}

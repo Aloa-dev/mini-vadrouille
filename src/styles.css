@@ -1,0 +1,149 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root block defines the light-only color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+
+:root {
+  --radius: 1rem;
+  --background: oklch(0.979826876 0.004519771 78.298270782);
+  --foreground: oklch(0.339334164 0.049594816 186.997015833);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.576472371 0.160950514 41.590873311);
+  --primary-hover: oklch(0.524376918 0.147401268 41.360720320);
+  --primary-foreground: oklch(1 0 0);
+  --forest: oklch(0.339334164 0.049594816 186.997015833);
+  --forest-hover: oklch(0.28 0.044 185.1);
+  --paper: oklch(1 0 0);
+  --secondary: var(--forest);
+  --secondary-foreground: var(--paper);
+  --muted: oklch(0.955675976 0.008416805 56.312220596);
+  --muted-foreground: oklch(0.478813975 0.046646649 187.847435309);
+  --accent: var(--muted);
+  --accent-foreground: var(--foreground);
+  --reassurance: var(--muted);
+  --destructive: oklch(0.505 0.19 27);
+  --destructive-foreground: var(--paper);
+  --border: oklch(0.911179636 0.013274058 82.401481894);
+  --input: var(--border);
+  --field: var(--reassurance);
+  --ring: var(--foreground);
+  --cocoon: oklch(0.961777746 0.016633218 40.801848238);
+  --cocoon-border: oklch(0.918582819 0.037760024 36.225303779);
+  --cocoon-accent: oklch(0.687820575 0.133123009 35.777852863);
+  --explorer: oklch(0.964180981 0.016279508 182.718530897);
+  --explorer-border: oklch(0.934650745 0.036881259 175.268410906);
+  --explorer-accent: oklch(0.632557310 0.100375784 205.300326346);
+  --adventurer: oklch(0.974570502 0.025162275 86.868625330);
+  --adventurer-border: oklch(0.935695497 0.069456027 88.265702879);
+  --adventurer-accent: oklch(0.740854608 0.147429529 86.144423090);
+  --shadow-card: 0 8px 24px -4px oklch(0.339334164 0.049594816 186.997015833 / 0.06);
+  --shadow-floating: 0 16px 36px -6px oklch(0.339334164 0.049594816 186.997015833 / 0.12);
+  --chart-1: var(--cocoon-accent);
+  --chart-2: var(--explorer-accent);
+  --chart-3: var(--adventurer-accent);
+  --chart-4: var(--forest);
+  --chart-5: var(--primary);
+  --sidebar: var(--card);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--paper);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+@theme inline {
+  --color-field: var(--field);
+  --font-sans: "Outfit", sans-serif;
+  --color-primary-hover: var(--primary-hover);
+  --color-forest: var(--forest);
+  --color-forest-hover: var(--forest-hover);
+  --color-paper: var(--paper);
+  --color-reassurance: var(--reassurance);
+  --color-cocoon: var(--cocoon);
+  --color-cocoon-border: var(--cocoon-border);
+  --color-cocoon-accent: var(--cocoon-accent);
+  --color-explorer: var(--explorer);
+  --color-explorer-border: var(--explorer-border);
+  --color-explorer-accent: var(--explorer-accent);
+  --color-adventurer: var(--adventurer);
+  --color-adventurer-border: var(--adventurer-border);
+  --color-adventurer-accent: var(--adventurer-accent);
+  --shadow-card: var(--shadow-card);
+  --shadow-floating: var(--shadow-floating);
+}
+@layer base {
+  * { border-color: var(--border); letter-spacing: 0; }
+  :root { color-scheme: light; }
+  body { background: var(--background); color: var(--foreground); font-family: "Outfit", sans-serif; font-size: 16px; }
+  ::selection { background: var(--explorer-border); color: var(--foreground); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+/* Shared search calendar: the endpoint color is independent of orange CTAs. */
+.kit-date-calendar [data-range-start="true"],
+.kit-date-calendar [data-range-end="true"] { background: var(--forest); color: var(--paper); }
+.kit-date-calendar [data-range-middle="true"] { background: var(--field); color: var(--foreground); }
+.kit-date-calendar th, .kit-date-calendar button { font-size: 14px; }
