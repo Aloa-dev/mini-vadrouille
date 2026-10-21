@@ -98,7 +98,7 @@ export function Home() {
       <h2 className="text-center text-4xl font-bold">Avis de familles</h2>
       <p className="mt-3 text-center text-muted-foreground">Découvrez comment d'autres parents ont vécu leur première escapade à vélo.</p>
       <div className="mt-10 grid gap-6 md:grid-cols-3">{reviews.map(r => <figure key={r.name} className="flex flex-col rounded-3xl border border-border bg-reassurance/60 p-7">
-        <div className="flex gap-1 text-adventurer-accent" aria-label="5 étoiles sur 5">{[0, 1, 2, 3, 4].map(n => <Star key={n} aria-hidden className="size-4 fill-current" />)}</div>
+        <div role="img" className="flex gap-1 text-adventurer-accent" aria-label="5 étoiles sur 5">{[0, 1, 2, 3, 4].map(n => <Star key={n} aria-hidden className="size-4 fill-current" />)}</div>
         <blockquote className="mt-5 flex-1 text-lg">{r.quote}</blockquote>
         <figcaption className="mt-6"><p className="font-semibold">{r.name}</p><p className="text-sm text-muted-foreground">{r.who}</p></figcaption>
       </figure>)}</div>
