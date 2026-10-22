@@ -57,6 +57,8 @@ describe("Inscription form", () => {
   it("refuses to create an account while the terms box is empty", async () => {
     const user = userEvent.setup();
     await renderAt("/inscription");
+    await user.type(screen.getByLabelText("Prénom"), "Léa");
+    await user.type(screen.getByLabelText("Adresse e-mail"), "lea@exemple.fr");
     await user.type(screen.getByLabelText("Mot de passe"), "Motdepasse123");
     await user.click(screen.getByRole("button", { name: "Créer mon compte" }));
 
@@ -67,6 +69,8 @@ describe("Inscription form", () => {
   it("clears the terms message once the box is ticked and sends the signup", async () => {
     const user = userEvent.setup();
     await renderAt("/inscription");
+    await user.type(screen.getByLabelText("Prénom"), "Léa");
+    await user.type(screen.getByLabelText("Adresse e-mail"), "lea@exemple.fr");
     await user.type(screen.getByLabelText("Mot de passe"), "Motdepasse123");
     const terms = screen.getByRole("checkbox", { name: "J'accepte les CGU et la politique de confidentialité" });
     await user.click(terms);

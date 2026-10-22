@@ -19,7 +19,7 @@ import avatarChloe from "@/assets/avatar-chloe.jpg.asset.json";
 import parentGuide from "@/assets/Guide-du-parent-cycliste.pdf.asset.json";
 
 export const guideDownload = parentGuide;
-export const demoRenter = { name: "Chloé", email: "parent.aventurier@gmail.com", city: "Bordeaux", age: "18 mois–3 ans", avatar: avatarChloe.url };
+export const demoRenter = { name: "Chloé", email: "chloe@exemple.fr", city: "Bordeaux", age: "18 mois–3 ans", avatar: avatarChloe.url };
 
 export const demoKits = [
   {
