@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import logo from "@/assets/logo-transparent.png.asset.json";
 import { Button } from "@/components/ui/button";
@@ -29,11 +29,14 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const user = useSessionUser();
-  const prenom = (user?.user_metadata?.['prenom'] as string | undefined)?.trim() || user?.email;
+  // Après la connexion, on ramène la visiteuse sur la page où elle était (sauf depuis les pages de connexion).
+  const location = useLocation();
+  const retour = location.pathname.startsWith("/connexion") || location.pathname.startsWith("/inscription") ? undefined : location.pathname + location.searchStr;
+  const prenom =(user?.user_metadata?.['prenom'] as string | undefined)?.trim() || user?.email;
   const signOut = async () => { setOpen(false); await supabase.auth.signOut(); void navigate({ to: "/", replace: true }); };
   const account = user
     ? <span className="inline-flex shrink-0 items-center gap-2"><span aria-hidden className="flex size-8 shrink-0 items-center justify-center rounded-full bg-forest text-sm font-semibold text-primary-foreground">{(prenom ?? "?").charAt(0).toUpperCase()}</span><span className="max-w-40 truncate font-medium">{prenom}</span><Button variant="ghost" size="sm" onClick={() => void signOut()}>Se déconnecter</Button></span>
-    : <Button variant="secondary" size="sm" asChild><Link to="/connexion" onClick={() => setOpen(false)}>Se connecter</Link></Button>;
+    : <Button variant="secondary" size="sm" asChild><Link to="/connexion" search={{ redirect: retour }} onClick={() => setOpen(false)}>Se connecter</Link></Button>;
   return <header className="border-b border-border bg-card">
     <div className="mx-auto grid max-w-[1440px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-5 sm:px-8 xl:flex xl:gap-6 xl:px-10">
       <Brand />
