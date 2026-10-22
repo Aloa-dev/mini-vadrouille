@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, ArrowLeft, Check, CheckCircle2, Clock, Compass, CreditCard, Heart, MapPin, Package, Scale, Share2, Shield, Star, Sun, Users, Wrench } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, CheckCircle2, Clock, Compass, CreditCard, MapPin, Package, Scale, Shield, Star, Sun, Users, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -40,7 +40,6 @@ function KitDetailView({ kit, stay }: { kit: KitCard; stay: Stay }) {
   const days = stayDays(stay);
   const [serenity, setSerenity] = useState(false);
   const paymentSearch = { kit: kit.id, debut: stay.debut, fin: stay.fin, serenity };
-  const [saved, setSaved] = useState(false);
   const rental = kit.dailyPrice * days;
   const service = Math.round(rental * demoBooking.serviceRate * 100) / 100;
   const serenityAmount = kit.serenity ?? demoBooking.serenity;
@@ -48,7 +47,6 @@ function KitDetailView({ kit, stay }: { kit: KitCard; stay: Stay }) {
   return <main className="mx-auto max-w-[1280px] px-5 pb-20 sm:px-8">
     <div className="flex flex-wrap items-center justify-between gap-3 py-5 text-sm">
       <Link to="/recherche" className="flex items-center gap-2 rounded-sm focus-visible:outline-2 focus-visible:outline-ring"><ArrowLeft className="size-4" />Kits Vélo Bordeaux Centre</Link>
-      <div className="flex gap-2"><Button variant="filter" size="sm" onClick={() => { if (navigator.share) void navigator.share({ title: kit.name, url: window.location.href }).catch(() => {}); else void navigator.clipboard?.writeText(window.location.href); }}><Share2 />Partager</Button><Button variant="filter" size="sm" aria-pressed={saved} onClick={() => setSaved(!saved)}><Heart className={saved ? "fill-current" : ""} />Sauvegarder</Button></div>
     </div>
     <section aria-label="Photos du kit" className="grid gap-2 overflow-hidden rounded-2xl md:h-[480px] md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
       <div className="relative h-[280px] min-h-0 min-w-0 sm:h-[380px] md:h-full">
