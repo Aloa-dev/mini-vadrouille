@@ -21,7 +21,7 @@
 |---|---|---|
 | Élevée | 0 | Aucun secret exposé, aucune faille directement exploitable repérée |
 | Moyenne | 4 | En-têtes de sécurité manquants ; dépendances de développement vulnérables ; réservations « fantômes » sans webhook ; CORS ouvert sur la fonction de paiement |
-| Faible | 6 | Voir section 4 |
+| Faible | 8 | Voir section 4 |
 | Information | 3 | Voir section 4 |
 
 ## 3. Ce qui est en bon état (vérifié)
@@ -40,7 +40,7 @@
 
 | # | Gravité | Constat | Recommandation | Statut |
 |---|---|---|---|---|
-| 1 | Moyenne | **En-têtes de sécurité manquants** sur le site : seul `Strict-Transport-Security` est présent. Absents : `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options` (ou `frame-ancestors`), `Referrer-Policy`, `Permissions-Policy` | Ajouter les en-têtes simples dans un fichier `vercel.json`. La politique CSP demande des essais (Stripe, Supabase, polices Google) : à reporter | À décider |
+| 1 | Moyenne | **En-têtes de sécurité manquants** sur le site : seul `Strict-Transport-Security` est présent. Absents : `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options` (ou `frame-ancestors`), `Referrer-Policy`, `Permissions-Policy` | Ajouter les en-têtes simples dans un fichier `vercel.json`. La politique CSP demande des essais (Stripe, Supabase, polices Google) : à reporter | **Partiellement corrigé le 22/10** : 4 en-têtes ajoutés via `vercel.json` (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`) et **vérifiés en ligne** avec `curl -I`. Contrôle indépendant avec securityheaders.com : tous les en-têtes ajoutés sont validés, seule la CSP manque (reportée) |
 | 2 | Moyenne | **5 vulnérabilités de dépendances** (4 modérées, 1 haute) : `vite` (haute : exécution de script depuis un autre site via un middleware du serveur de développement, fichiers hors périmètre servis sur d'autres systèmes), `esbuild` (le serveur de développement répond à n'importe quel site), `drizzle-kit` et deux paquets `@esbuild-kit` qui en dépendent. **Toutes concernent les outils de développement**, pas le site servi par Vercel | Ne lancer `npm run dev` que le temps nécessaire, et ne pas naviguer sur des sites non fiables pendant ce temps. Mise à jour de `vite` et `drizzle-kit` après la soutenance, avec tests (la version de `vite` est fixée par la configuration Lovable) | Assumé jusqu'après le jury |
 | 3 | Moyenne | **Réservations « fantômes »** : la réservation est créée avant la fin du paiement (pas de webhook Stripe). Une personne connectée peut créer des demandes sans payer et bloquer les dates d'un kit | La tâche planifiée qui fait expirer les demandes à 24 h réduit le problème (hypothèse : à vérifier que les dates sont libérées). Webhook Stripe en version suivante | Assumé |
 | 4 | Moyenne | **CORS ouvert à tous** (`Access-Control-Allow-Origin: *`) sur la fonction de paiement. Le risque est limité (la connexion est exigée et le jeton ne peut pas être lu depuis un autre site) | Restreindre aux domaines du projet, comme sur la fonction IA | À décider |
@@ -50,10 +50,11 @@
 | 8 | Faible | **Injection d'instructions (prompt injection)** : atténuée (consignes strictes, texte encadré, test de détournement réussi) mais jamais éliminée | Garder les consignes, ne donner à l'IA aucun accès ni outil | Assumé |
 | 9 | Faible | **Clé publique Supabase et URL du projet écrites en dur** dans `src/integrations/supabase/client.ts`, depuis le premier commit (fichier généré par Lovable). Ce n'est pas un secret (faite pour le navigateur) : la protection repose sur la RLS | Lire ces valeurs depuis les variables d'environnement | À décider |
 | 10 | Faible | **Adresse e-mail de démonstration préremplie** sur le formulaire d'inscription public (une adresse Gmail de test, prénom « Chloé »), présente dans le code public. Choix de commodité pour la démo | La retirer après la soutenance (ou la remplacer par un texte d'exemple) | **Corrigé le 22/10** : le formulaire d'inscription n'est plus prérempli |
-| 11 | Faible | **Données traitées par un tiers** : le texte décrivant le vélo est envoyé à Groq (société américaine). La politique de réutilisation des données de l'offre gratuite n'a pas été vérifiée | Lire les conditions de Groq ; l'avertissement « ne saisissez ni nom ni coordonnées » est affiché sous le champ | À vérifier |
+| 11 | Faible | **Données traitées par un tiers** : le texte décrivant le vélo est envoyé à Groq (société américaine). La console de Groq (réglages « Data Controls », capture du 22/10) indique que **Groq peut conserver les entrées et sorties jusqu'à 30 jours**, à des fins de fiabilité et de conformité, tant que l'option « Inference APIs ZDR » n'est pas activée (elle était désactivée). La documentation de Groq indique par ailleurs ne pas entraîner ses modèles sur les données clients (non revérifié). Les données sont hébergées aux États-Unis | Activer « Inference APIs ZDR » (suffisant ici : l'option globale désactiverait aussi des fonctions dont nous n'avons pas besoin) ; garder l'avertissement « ne saisissez ni nom ni coordonnées » sous le champ ; relire les conditions avant un vrai lancement | **Corrigé le 22/10** : « Inference APIs ZDR » activé dans la console Groq (capture conservée dans le dossier des preuves). Les autres réglages (Global ZDR, Batch, Fine-tuning) sont inchangés |
 | 12 | Information | **Secrets partagés** : les Secrets des Edge Functions sont communs à toutes les fonctions du projet | Rien à faire à cette échelle | Noté |
 | 13 | Information | **Confirmation d'e-mail désactivée** à l'inscription (décision pour la démo) : n'importe quelle adresse peut créer un compte | La réactiver pour un vrai lancement | Assumé |
 | 14 | Information | **Latence** : les fonctions du site s'exécutent à Washington (`iad1`) alors que les visiteurs sont en France | Choisir une région plus proche de Supabase dans les réglages Vercel (région de Supabase à confirmer) | Noté |
+| 15 | Faible | **Énumération de comptes** : à l'inscription, le message « Un compte existe déjà avec cette adresse e-mail » révèle qu'une adresse possède un compte. (Le message de connexion, lui, reste générique, ce qui est bon.) | Message neutre en version suivante, ce qui suppose de réactiver la confirmation par e-mail | Assumé |
 
 ## 5. Ce qui n'a PAS été vérifié
 
@@ -67,3 +68,15 @@
 ## 6. Conclusion
 
 Aucune faille directement exploitable et aucun secret exposé n'ont été trouvés dans le périmètre examiné. Les points les plus utiles à traiter sont les **en-têtes de sécurité** (correction simple) et la **restriction du CORS** de la fonction de paiement. Les autres sont des limites assumées d'un projet de démonstration (pas de webhook, pas de quota par utilisateur, mise à jour des outils de développement après la soutenance), à présenter comme telles.
+
+## 7. Plan de remédiation après la soutenance
+
+| Priorité | Action | Constat |
+|---|---|---|
+| 1 | Webhook Stripe : confirmer la réservation seulement quand le paiement est reçu ; libérer les dates sinon | 3 |
+| 2 | Restreindre le CORS et uniformiser les messages d'erreur de la fonction de paiement | 4, 6 |
+| 3 | Ajouter une politique de sécurité de contenu (CSP) après essais avec Stripe et Supabase | 1 |
+| 4 | Mettre à jour `vite`, `drizzle-kit` et leurs dépendances, avec tests | 2 |
+| 5 | Quota par compte sur la fonction IA ; migration vers `SUPABASE_SECRET_KEYS` | 5, 7 |
+| 6 | Lire l'URL et la clé publique de Supabase depuis les variables d'environnement | 9 |
+| 7 | Réactiver la confirmation d'e-mail et rendre le message d'inscription neutre | 13, 15 |
