@@ -10,6 +10,7 @@ import { compatibilityImages, demoBooking, equipmentImages, euros, gallery, kitD
 import { fetchKit, type KitCard } from "@/data/kits";
 import { stayDays, stayLabel, type Stay } from "@/lib/stay";
 import { useSessionUser } from "@/hooks/use-session-user";
+import { CompatibilityAssistant } from "@/components/compatibility-assistant";
 
 const sectionClass = "border-t border-border pt-8";
 
@@ -78,6 +79,7 @@ function KitDetailView({ kit, stay }: { kit: KitCard; stay: Stay }) {
         <section className={sectionClass}><h2 className="flex items-center gap-2 text-xl font-bold"><Wrench className="size-5" />Est-ce compatible avec votre vélo ?</h2><p className="mt-4 text-sm text-muted-foreground">{kitDetail.compatibilityIntro}</p>
           <div className="mt-4 grid gap-4 sm:grid-cols-3">{kitDetail.compatibility.map((step, i) => <Card key={step.title} className="overflow-hidden"><img src={compatibilityImages[i]} alt={step.title} className="aspect-[1.7] w-full object-cover" /><div className="p-4"><h3 className="font-bold">{step.title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.text}</p></div></Card>)}</div>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"><div className="flex items-center gap-3"><Scale className="size-6 shrink-0" /><div><h3 className="text-sm font-bold">Poids et charge maximale</h3><p className="text-sm text-muted-foreground">{kitDetail.weightDescription}</p></div></div><Badge variant="outline">{kit.maxWeight} kg max</Badge></div>
+          <CompatibilityAssistant kitId={kit.id} user={user} returnTo={`/kits/${kit.id}?debut=${stay.debut}&fin=${stay.fin}`} />
         </section>
         <section className={sectionClass}><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="flex items-start gap-2 text-xl font-bold"><Shield className="mt-1 size-5 shrink-0" />Checklist déclarative du loueur (à vérifier lors de la remise)</h2><span className="text-sm text-muted-foreground">Dernier contrôle : {kitDetail.lastCheck}</span></div><p className="mt-4 text-sm text-muted-foreground">{kitDetail.checklistIntro}</p>
           <ul className="mt-4 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">{kitDetail.checklist.map(item => <li key={item.title} className="flex flex-wrap items-center justify-between gap-3 p-4"><div className="flex min-w-0 flex-1 items-start gap-3"><CheckCircle2 className="mt-1 size-4 shrink-0" /><div><p className="text-sm font-semibold">{item.title}</p><p className="text-sm text-muted-foreground">{item.text}</p></div></div><Badge variant="outline" className="bg-muted">DÉCLARÉ PAR LE LOUEUR</Badge></li>)}</ul>
