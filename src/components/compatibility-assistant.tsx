@@ -114,7 +114,7 @@ export function CompatibilityAssistant({
               </Link>
             </Button>
             <p className="text-sm text-muted-foreground">
-              La connexion évite les abus et permet de réserver ensuite.
+              Si la compatibilité est confirmée, vous pourrez réserver dans la foulée.
             </p>
           </>
         )}
