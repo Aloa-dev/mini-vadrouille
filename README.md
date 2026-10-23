@@ -49,6 +49,8 @@ Les personas (simulés) : **Chloé**, locataire, persona principale ; **Thomas**
 - Demande de réservation avec paiement Stripe en mode test.
 - « Mes réservations » : la locataire ne voit que les siennes, avec leur statut.
 - Guide du parent cycliste téléchargeable (PDF).
+- **Aide à la compatibilité par IA** : sur la fiche du kit de Thomas, la locataire connectée décrit son vélo (500 caractères maximum) et reçoit une réponse **informative, jamais affirmative**, à confirmer avec le loueur. L'IA s'appuie uniquement sur la fiche de compatibilité du kit ; sans fiche, elle répond « information non disponible ». Code : `supabase/functions/compatibilite-velo/`.
+- **Automatisation** : une tâche `pg_cron` (toutes les heures) passe en « expirée » les demandes de réservation restées sans réponse après 24 h. Code : `supabase/cron-expiration-demandes.sql`.
 
 **Décrit dans le cahier des charges mais non codé en V1 :** parcours loueur et administrateur, e-mails automatiques, annulation par la locataire, remboursement de la caution, avis. Voir [Limites connues](#limites-connues).
 
@@ -67,6 +69,8 @@ Les personas (simulés) : **Chloé**, locataire, persona principale ; **Thomas**
 | Paiement | [Stripe](https://stripe.com) (Connect, mode test), appelé depuis une Edge Function Supabase |
 | Éditeur et assistant | VS Code et Claude Code |
 | Versionnement | GitHub (dépôt privé) |
+| Intelligence artificielle | [Groq](https://groq.com) (plan gratuit, modèle ouvert `openai/gpt-oss-120b`), appelé depuis une Edge Function Supabase ; clé dans les Secrets Supabase |
+| Automatisation | `pg_cron` (extension PostgreSQL de Supabase) |
 | Hébergement | [Vercel](https://vercel.com), déploiement automatique à chaque `git push` sur `main` |
 | Nom de domaine | OVHcloud (DNS pointant vers Vercel, HTTPS automatique) |
 | Tests | Vitest et Testing Library |
@@ -103,7 +107,7 @@ Le fichier `.env.example` liste les variables attendues, **sans aucune valeur**.
 | `VITE_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_PUBLISHABLE_KEY` | Clé **publique** (« publishable »), faite pour être lue par le navigateur |
 | `VITE_SUPABASE_PROJECT_ID`, `SUPABASE_PROJECT_ID` | Identifiant du projet Supabase |
 
-Sur Vercel, les mêmes variables sont définies dans *Settings → Environment Variables*. Les clés secrètes (Stripe) ne sont **pas** dans ce projet : elles vivent dans les *Secrets* de Supabase.
+Sur Vercel, les mêmes variables sont définies dans *Settings → Environment Variables*. Les clés secrètes (Stripe, Groq) et l'adresse du site (`SITE_URL`) ne sont **pas** dans ce projet : elles vivent dans les *Secrets* de Supabase.
 
 ## Utilisation : le parcours de démo
 
@@ -132,6 +136,8 @@ Prix de démonstration : 3 jours × 22 € = 66 €, plus **10 % de frais de ser
 - **RLS (Row Level Security) activée sur les 8 tables** : une utilisatrice ne lit que son profil et ses réservations. Détail dans [`docs/RLS.md`](docs/RLS.md).
 - **RGPD** : anonymisation du compte à la demande (on n'efface pas, on anonymise puis on désactive la connexion), durées de conservation définies, données envoyées aux services tiers limitées au strict nécessaire. Une table `demandes_suppression` trace les demandes.
 - Seule la tranche d'âge du kit est utilisée : aucune donnée sur les enfants n'est collectée.
+- **IA et vie privée** : la fonction n'est accessible qu'aux personnes connectées (protection contre les abus). Elle n'envoie à Groq que le nom du kit, la fiche de compatibilité et le texte du vélo, sans nom ni coordonnées (un avertissement l'indique dans l'interface), et ne journalise jamais ce texte. L'option de non-conservation des données de Groq (ZDR) est activée ; les serveurs restent aux États-Unis.
+- **En-têtes de sécurité** du site définis dans `vercel.json` ; **audit de sécurité** complet dans [`docs/AUDIT-SECURITE.md`](docs/AUDIT-SECURITE.md).
 
 ## Documentation
 
@@ -140,6 +146,8 @@ Prix de démonstration : 3 jours × 22 € = 66 €, plus **10 % de frais de ser
 | [`docs/Note-de-cadrage-mini-vadrouille.md`](docs/Note-de-cadrage-mini-vadrouille.md) | Problème, proposition de valeur, personas, objectifs SMART, périmètre MVP, grille de stack, risques |
 | [`docs/ERA.md`](docs/ERA.md) | Diagramme entité-relation de la base Supabase (8 tables) |
 | [`docs/RLS.md`](docs/RLS.md) | Règles de sécurité des données, table par table |
+| [`docs/AUDIT-SECURITE.md`](docs/AUDIT-SECURITE.md) | Audit de sécurité : constats, limites assumées, plan de remédiation après la soutenance |
+| [`docs/TESTS-EXPLORATION.md`](docs/TESTS-EXPLORATION.md) | Tests exploratoires du site en production (« utilisateur curieux ») |
 
 ## Structure du projet
 
@@ -164,18 +172,17 @@ Ces points sont assumés et expliqués ici pour ne rien cacher :
 - **Pas de webhook Stripe** : une réservation peut exister sans paiement terminé.
 - **Frais Stripe** : la plateforme les supporte sur la totalité du paiement, caution comprise (environ 7,43 € de frais pour 6 € de frais de service gardés sur un paiement test de 228 €). Pistes pour un lancement réel : ligne « frais de paiement » pour la locataire, taux de service plus élevé, ou pré-autorisation de la caution.
 - **Tous les paiements de test vont au même compte connecté** (celui de Thomas), quel que soit le propriétaire du kit.
-- **Non codés en V1** : e-mails automatiques, annulation par la locataire, remboursement de la caution et refus automatique à 24 h (décrits dans le cahier des charges).
+- **Non codés en V1** : e-mails automatiques, annulation par la locataire et remboursement de la caution (décrits dans le cahier des charges). Les demandes sans réponse après 24 h passent en « expirée » ; le remboursement associé n'est pas automatisé.
+- **Aide IA limitée** : seule la fiche de compatibilité du kit de Thomas est renseignée, et il n'y a pas de quota par utilisateur (limites du plan gratuit de Groq : environ 1 000 requêtes par jour). La messagerie entre locataire et loueur est hors V1 : le « mot pour le loueur » et la remise en main propre couvrent la coordination.
 - **Dates de recherche** : elles ne filtrent pas les kits, car les réservations des autres utilisateurs ne sont volontairement pas lisibles.
 - **Données en dur dans le code** : notes, nombres d'avis, textes et prénoms des loueurs, et photos des kits (`src/data/kits.ts`). Ce sont des textes fictifs de démonstration.
 - **Pas de Supabase Realtime** pour l'instant.
-- Le code de la fonction de paiement est hébergé côté Supabase et n'est pas encore versionné dans ce dépôt.
 - Base Supabase sur le plan gratuit : elle peut se mettre en pause après une semaine d'inactivité.
 
 ## Prochaines étapes
 
-- Fonctionnalité IA : aide à la compatibilité entre le vélo de la locataire et le kit, réponse informative à confirmer avec le loueur, clé d'API dans les Secrets Supabase.
-- Automatisation : refus automatique à 24 h des demandes sans réponse, veille concurrence hebdomadaire avec Claude Cowork.
-- Versionner l'Edge Function de paiement dans `supabase/functions/`.
+- Corrections de l'[audit de sécurité](docs/AUDIT-SECURITE.md) : webhook Stripe, quota IA par utilisateur, mise à jour des dépendances de développement, restriction des origines autorisées (CORS) de la fonction de paiement.
+- Fiches de compatibilité pour les autres kits.
 - Documentation utilisateur et page de confidentialité.
 - Une vue de suivi dynamique des réservations (Supabase Realtime).
 

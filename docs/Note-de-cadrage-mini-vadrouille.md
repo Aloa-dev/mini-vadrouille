@@ -1,6 +1,6 @@
 # Cadrage · Mini Vadrouille (projet fil rouge)
 
-*Template du live du mercredi, adapté au projet fil rouge. Rempli le 23 septembre 2026, mis à jour le 24 septembre 2026 à partir du carnet produit. Mis à jour le 14 octobre 2026 et aligné sur le PRD : prénoms des personas (Chloé, Thomas), stack, stock, interviews, option sérénité, décisions du 9 octobre. Mis à jour le 21 octobre 2026 : code sorti de Lovable, stack réelle (TanStack Start), déploiement Vercel et domaine, décisions du 16 au 21 octobre.*
+*Template du live du mercredi, adapté au projet fil rouge. Rempli le 23 septembre 2026, mis à jour le 24 septembre 2026 à partir du carnet produit. Mis à jour le 14 octobre 2026 et aligné sur le PRD : prénoms des personas (Chloé, Thomas), stack, stock, interviews, option sérénité, décisions du 9 octobre. Mis à jour le 21 octobre 2026 : code sorti de Lovable, stack réelle (TanStack Start), déploiement Vercel et domaine, décisions du 16 au 21 octobre. Mis à jour le 23 octobre 2026 : IA (Groq) et automatisation (pg_cron) en production, audit de sécurité.*
 
 > ⚠️ **Statut** : version vivante. Les personas sont **simulés** et les signaux viennent surtout de blogs et de sites. Les interviews de parents ne sont **pas prévues** (projet de formation) : les personas et les hypothèses H1 à H3 restent des hypothèses. **Rappel : projet de formation, pas un vrai lancement** — pas besoin de pousser à fond les démarches admin/business réelles (INPI, interviews exhaustives...), l'essentiel jugé par le jury est la démarche produit. **Soutenance : 27 octobre 2026 à 14 h.** **Produit en ligne au 21/10** : mini-vadrouille.fr (Vercel), code sur GitHub (privé).
 
@@ -136,7 +136,7 @@ V1 : teaser + fiche complète simple. V2 : enrichir la fiche (itinéraire struct
 
 **Démo du 27/10 :** uniquement le parcours de la locataire (Chloé), 9 écrans Stitch. Pas d'écrans loueur ni admin.
 
-**Écarts entre la V1 prévue et la V1 construite (21/10) :** e-mails automatiques non codés ; annulation par la locataire décrite mais bouton retiré ; refus automatique à 24 h décrit, tâche planifiée prévue mais pas encore faite ; pas de webhook Stripe (la réservation existe dès la demande, même si le paiement n'est pas terminé) ; remboursement de la caution manuel et non codé ; dates de recherche non filtrantes ; fonctionnalité IA (compatibilité du vélo) décidée, pas encore construite ; Supabase Realtime absent. Le détail est dans le PRD (sections 13 et 14).
+**Écarts entre la V1 prévue et la V1 construite (21/10) :** e-mails automatiques non codés ; annulation par la locataire décrite mais bouton retiré ; expiration automatique à 24 h faite (tâche `pg_cron`, les demandes sans réponse passent en « expirée », remboursement associé non automatisé) ; pas de webhook Stripe (la réservation existe dès la demande, même si le paiement n'est pas terminé) ; remboursement de la caution manuel et non codé ; dates de recherche non filtrantes ; fonctionnalité IA (compatibilité du vélo) en production, mais une seule fiche de compatibilité (kit de Thomas) et pas de quota par utilisateur ; Supabase Realtime absent. Le détail est dans le PRD (sections 13 et 14).
 
 ---
 
@@ -181,7 +181,8 @@ V1 : teaser + fiche complète simple. V2 : enrichir la fiche (itinéraire struct
 | VS Code + Claude Code | Éditeur de code et assistant de code | Gratuit pour l'éditeur, retenu à la place de Cursor (décision du 8 octobre) ; Claude Code utilisé depuis le 20/10 |
 | GitHub + Vercel | Versionnement et déploiement | Stack du template de la formation ; dépôt privé, plan Hobby, déploiement automatique à chaque push sur main |
 | Nom de domaine (OVHcloud) | Adresse mini-vadrouille.fr | Payant et justifié : 5,99 € TTC pour 1 an (renouvellement 7,79 €/an), exigé par le point 7 de la checklist ; Hostinger écarté (panier opaque) |
-| Fournisseur d'IA (à choisir) | Fonctionnalité IA de compatibilité du vélo | Mistral proposé (RGPD, entreprise française), Gemini écarté par défaut ; décision d'Aloa à prendre ; clé dans les Secrets Supabase |
+| Groq (fournisseur d'IA) | Fonctionnalité IA de compatibilité du vélo | Plan gratuit sans carte, modèle ouvert `openai/gpt-oss-120b` (limites : 30 requêtes par minute, 1 000 par jour), clé dans les Secrets Supabase. Mistral écarté (15 € de crédit exigés), Gemini écarté. Données minimales (pas de nom ni de coordonnées), option de non-conservation (ZDR) activée ; hébergement aux États-Unis, métadonnées d'usage conservées |
+| pg_cron | Expiration automatique des demandes sans réponse | Extension PostgreSQL de Supabase, gratuite ; tâche horaire prouvée par `cron.job_run_details` (22/10) |
 
 ---
 
@@ -303,8 +304,12 @@ V1 : teaser + fiche complète simple. V2 : enrichir la fiche (itinéraire struct
 - **RGPD** (9/10) : suppression ou anonymisation du compte dans le mois suivant la demande ; avis conservé sous « Un parent vadrouilleur » ; paiements archivés 10 ans à accès restreint ; photos d'état des lieux supprimées après la fin d'un éventuel litige (sinon 6 mois après le remboursement de la caution) ; compte dormant supprimé après 3 ans sans connexion, avec e-mail d'avertissement. Détail dans le PRD, section 12.
 - **Paiement** (16 et 17/10) : paiement indirect simple (la locataire paie la plateforme, une part est transférée au loueur), page de paiement hébergée par Stripe, pas de webhook ; la plateforme garde les frais de service et la caution, le loueur reçoit la location et l'option sérénité ; frais Stripe pris en charge par la plateforme (limite assumée) ; Stripe en mode test uniquement. Montants recalculés côté serveur par une Edge Function Supabase.
 - **Suppression de compte** (14/10) : on anonymise le profil puis on désactive la connexion, on n'efface jamais (sauf comptes de test).
-- **Feature IA : compatibilité du vélo** (17/10) : la locataire décrit son vélo, l'IA compare avec la fiche de compatibilité du kit et répond de façon informative, jamais affirmative, à confirmer avec le loueur ; texte seulement ; clé dans les Secrets Supabase. Fournisseur pas encore choisi (Mistral proposé).
-- **Automatisation** (17 et 19/10) : refus automatique à 24 h par tâche planifiée Supabase (à faire, pg_cron à vérifier) ; veille concurrence hebdomadaire par Claude Cowork (à créer).
+- **Feature IA : compatibilité du vélo** (17/10) : la locataire décrit son vélo, l'IA compare avec la fiche de compatibilité du kit et répond de façon informative, jamais affirmative, à confirmer avec le loueur ; texte seulement ; clé dans les Secrets Supabase.
+- **IA en production** (22/10) : fournisseur **Groq** (plan gratuit, modèle ouvert `openai/gpt-oss-120b`) à la place de Mistral. **Connexion obligatoire** pour l'utiliser (option A, pour protéger l'API contre les abus). Texte limité à 500 caractères, avertissement « ne saisissez ni nom ni coordonnées », seuls le nom du kit, la fiche de compatibilité et le texte du vélo sont envoyés, rien n'est journalisé. Fiche de compatibilité rédigée par Aloa (ex-technicienne cycles) pour le kit de Thomas ; les autres kits répondent « information non disponible ». Réponse informative, jamais affirmative, renvoyant vers le « mot pour le loueur » ou la remise.
+- **Automatisation** (22/10) : expiration des demandes sans réponse après 24 h par une tâche `pg_cron` horaire, preuve dans `cron.job_run_details`. **Veille concurrence Cowork : non faite** (peu de temps avant la soutenance) ; à faire seulement s'il reste du temps, sinon justifiée à l'oral.
+- **Messagerie hors V1** (22/10) : la coordination locataire-loueur passe par le « mot pour le loueur » de la demande et la remise en main propre.
+- **Audit de sécurité** (22/10) : [`AUDIT-SECURITE.md`](AUDIT-SECURITE.md), 15 constats, limites assumées avant la soutenance, remédiations planifiées après (webhook Stripe, quota IA par utilisateur, dépendances de développement, CORS de la fonction de paiement). En-têtes de sécurité ajoutés via `vercel.json`. Tests exploratoires dans [`TESTS-EXPLORATION.md`](TESTS-EXPLORATION.md).
+- **RGPD et interface** (22/10) : texte du vélo envoyé à Groq sans nom ni coordonnées ; toute newsletter future exigerait un consentement distinct ; préremplissage de démo retiré de l'inscription ; boutons « Partager » et « Sauvegarder » retirés de la fiche kit (sans effet).
 - **E-mails automatiques non codés en V1** (19/10) ; **annulation par la locataire non codée**, bouton retiré (19/10).
 - **Sortie de Lovable et mise en ligne** (20 et 21/10) : code repris dans un dépôt GitHub privé (Aloa-dev/mini-vadrouille), déployé sur Vercel (plan Hobby, déploiement à chaque push sur main), domaine mini-vadrouille.fr acheté chez OVHcloud (5,99 € TTC pour 1 an), images rapatriées dans le dépôt. Premier commit nommé différemment de « M0 - Setup initial » : historique publié non réécrit, choix assumé.
 - **Conventions de travail** (20 et 21/10) : Aloa tape les commandes elle-même ; pas de commit ou push sans son accord ; .env jamais lu ni commité ; commits nommés « Mx - description ».
@@ -334,8 +339,10 @@ Règle : faire raconter le vécu avant de présenter l'idée, interroger le pass
 - [x] ~~Vérifier la norme EN 15918~~ — fait le 24/09, confirmée et intégrée à la checklist
 - [x] ~~Faire valider au formateur le critère de stock basé sur un calendrier~~ — validé, stock géré par un calendrier de disponibilité
 - [x] ~~Sortir le code de Lovable, créer le dépôt GitHub, déployer sur Vercel, acheter le domaine~~ — fait les 20 et 21/10
-- [ ] Déposer cette note de cadrage et le PRD dans le dépôt GitHub (dossier docs/), preuves des points 16 et 17 de la checklist
+- [x] ~~Déposer cette note de cadrage dans le dépôt GitHub (dossier docs/)~~ — fait ; le PRD reste hors dépôt, par choix d'Aloa
 - [ ] Vérifier la structure « 8 sections » de la note de cadrage par rapport au template de la formation
-- [ ] Choisir le fournisseur d'IA, construire la fonctionnalité de compatibilité du vélo
-- [ ] Construire l'automatisation (refus à 24 h) et la veille concurrence Cowork
+- [x] ~~Choisir le fournisseur d'IA, construire la fonctionnalité de compatibilité du vélo~~ — fait le 22/10, Groq, en production
+- [x] ~~Construire l'automatisation (expiration à 24 h)~~ — fait le 22/10, `pg_cron`
+- [x] ~~Audit de sécurité~~ — fait le 22/10, [`AUDIT-SECURITE.md`](AUDIT-SECURITE.md)
+- [ ] Veille concurrence Cowork — seulement s'il reste du temps avant le 27/10
 - [ ] Trancher le dashboard / Supabase Realtime
