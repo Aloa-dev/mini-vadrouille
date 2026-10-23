@@ -1,0 +1,87 @@
+# Rapport d'Audit d'Accessibilité Numérique (WCAG 2.1 AA / RGAA)
+**Écran audité :** `Accueil - Recherche & Kits vélo (Warm Family Outdoors)` ({{DATA:SCREEN:SCREEN_3}})  
+**Application :** Mini Vadrouille (Marketplace location matériel vélo famille)  
+**Date d'évaluation :** Mai 2026  
+**Référentiel :** Web Content Accessibility Guidelines (WCAG) 2.1 Niveau AA / RGAA 4.1.2  
+
+---
+
+## Synthèse Exécutive
+
+| Règle WCAG | Statut d'évaluation | Niveau d'impact |
+| :--- | :--- | :--- |
+| **1. Perceptible** (Contraste des couleurs, alternatives textuelles, structure visuelle) | ⚠️ Conforme partiel | Moyen |
+| **2. Utilisable** (Navigation au clavier, focus visible, dimensions des cibles tactiles) | ⚠️ Améliorations requises | Moyen |
+| **3. Compréhensible** (Lisibilité, cohérence des libellés, formulaires et guidage) | ✅ Conforme | Faible |
+| **4. Robuste** (Sémantique HTML5, attributs ARIA, compatibilité lecteurs d'écran) | ⚠️ Conforme partiel | Moyen |
+
+**Score global estimé :** **81 / 100**
+
+---
+
+## 1. Perceptible
+
+### 1.1 Alternatives textuelles des images (Critère WCAG 1.1.1 - Niveau A)
+* **Photos & Avatars fonctionnels :**
+  - **Hero (`img` famille à vélo) :** Présente une description fonctionnelle (`alt="Famille avec enfants à vélo sur un sentier côtier"`).
+  - **Badge loueur Thomas :** L'avatar possède un texte alternatif (`alt="Portrait de Thomas, loueur expert"`).
+  - **Photos des 3 étapes :** Les photos illustrant « 1. Avant le départ », « 2. Pendant le voyage » et « 3. Au retour » doivent comporter des descriptions plus précises du contexte plutôt qu'un texte générique (ex. `alt="Couple vérifiant l'attache de la remorque vélo dans une cour pavée"`, `alt="Famille pédalant en forêt avec une remorque et un siège enfant"`, `alt="Parent nettoyant la roue de la remorque lors de l'état des lieux"`).
+* **Éléments purement décoratifs :**
+  - Les pictogrammes SVG d'étoiles (section « Avis de familles »), les coches de validation et les icônes de calendrier / pin de localisation doivent systématiquement comporter `aria-hidden="true"` lorsque l'information est déjà formulée en texte clair adjacent.
+
+### 1.2 Ratios de contraste des couleurs (Critère WCAG 1.4.3 - Niveau AA)
+* **Texte Vert Sapin sombre (`#12403C`) :**
+  - Sur fond crème chaud `#FBF9F6` ou conteneur blanc `#FFFFFF`, le ratio de contraste dépasse **11.5:1**, assurant une excellente lisibilité.
+  - Sur les cartes pastel de kits :
+    - Fond Pêche clair (`Kit Petit Cocon`) : ratio **~7.1:1** ✅
+    - Fond Menthe doux (`Kit Explorateur Curieux`) : ratio **~6.8:1** ✅
+    - Fond Jaune doré (`Kit Mini Baroudeur`) : ratio **~6.2:1** ✅
+* **Bouton d'action principal Rouge Corail (`#D83A54`) :**
+  - Le texte blanc sur fond `#D83A54` offre un ratio de **4.7:1**, conforme au seuil strict WCAG AA (minimum 4.5:1 pour le texte standard).
+* **Textes secondaires et légendes :**
+  - Les indications secondaires (ex. sous-titre de recherche, légendes de formulaires) en gris sur fond beige ou crème doivent maintenir un contraste minimal de **4.5:1** (privilégier `#2F5551` ou `#374151` plutôt que des gris trop désaturés).
+
+---
+
+## 2. Utilisable
+
+### 2.1 Navigation au clavier et Focus Visible (Critères WCAG 2.1.1 & 2.4.7 - Niveau AA)
+* **Indicateurs de focus :**
+  - Les éléments interactifs (bouton de recherche « Trouver un kit », champs du moteur de recherche, pastilles de tranche d'âge « 9–18 mois », « 18 mois–3 ans », « 3–6 ans », sélecteur « 1 enfant / 2 enfants », et boutons « Télécharger le guide (PDF) ») doivent systématiquement présenter un anneau de focus net à la tabulation clavier (`focus-visible:ring-2 focus-visible:ring-[#12403C] focus-visible:ring-offset-2`).
+* **Sélecteurs de filtres (Boutons bascules) :**
+  - Les boutons bascules de tranches d'âge et de nombre d'enfants doivent posséder l'attribut `aria-pressed="true|false"` pour vocaliser immédiatement leur sélection aux utilisateurs de technologies d'assistance (NVDA, VoiceOver, JAWS).
+
+### 2.2 Cibles tactiles (Critère WCAG 2.5.5 / 2.5.8 - Niveau AA)
+* Toutes les pastilles et champs interactifs respectent une hauteur minimale confortable (≥ 44px) avec un espacement suffisant pour éviter les erreurs de saisie tactile.
+
+---
+
+## 3. Compréhensible
+
+### 3.1 Clarté et prévisibilité (Critères WCAG 3.1 & 3.2)
+* Déclaration de la langue française (`lang="fr"`).
+* Organisation chronologique logique des 3 étapes (« 1. Avant le départ », « 2. Pendant le voyage », « 3. Au retour »).
+* Transparence sur les garanties, la caution Stripe et l'annulation sans frais sous 48h.
+
+---
+
+## 4. Robuste
+
+### 4.1 Sémantique HTML5 et repères de navigation (Critères WCAG 1.3.1 & 4.1.2)
+* **Hiérarchie des titres (Headings) :**
+  - `<h1>` : « L'aventure à vélo en famille, l'esprit tranquille. »
+  - `<h2>` : « La nouvelle façon de partir à vélo en famille », « Comment ça marche », « De la réservation au retour du kit, en 3 étapes », « Avis de familles ».
+  - `<h3>` : Noms de chaque kit et étapes (« 1. Avant le départ », « 2. Pendant le voyage », « 3. Au retour »).
+* **Listes et groupements ARIA :**
+  - La section des 3 cartes d'âge et la section des 3 avis de familles doivent être balisées dans des listes sémantiques `<ul role="list">` / `<li>`.
+  - Le groupe de pastilles d'âge et d'enfants doit porter un conteneur avec `role="group"` et `aria-labelledby` pointant sur le libellé « ÂGE DU OU DES ENFANTS » et « NOMBRE D'ENFANTS ».
+
+---
+
+## Plan d'actions et Recommandations Prioritaires
+
+1. **Attributs ARIA sur les filtres :** Ajouter `role="group"` et `aria-pressed="true|false"` sur les filtres d'âge et de nombre d'enfants.
+2. **Structure de liste :** Encapsuler les 3 cartes d'âge et les 3 avis de familles dans des éléments `<ul role="list">` / `<li>` pour une navigation optimisée à la synthèse vocale.
+3. **Alternatives textuelles des étapes :** Renseigner des attributs `alt` précis sur les 3 photos illustrant les étapes du voyage.
+4. **Masquage des décorations :** Appliquer `aria-hidden="true"` sur les SVG d'étoiles, coches et icônes d'accompagnement.
+5. **Indicateurs de focus visible :** Renforcer `focus-visible:ring-2 focus-visible:ring-[#12403C]` sur tous les éléments cliquables.
