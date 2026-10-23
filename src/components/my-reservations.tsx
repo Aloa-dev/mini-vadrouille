@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { Calendar, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,7 +25,18 @@ async function fetchReservations() {
 }
 
 export function MyReservations() {
+ const queryClient = useQueryClient();
  const q = useQuery({ queryKey: ['mes-reservations'], queryFn: fetchReservations });
+ // Supabase Realtime : un changement sur une de ses réservations recharge la liste sans recharger la page.
+ // Les règles RLS s'appliquent aussi à Realtime : la locataire ne reçoit que ses propres changements.
+ useEffect(() => {
+  const channel = supabase.channel('mes-reservations')
+   .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, () => {
+    void queryClient.invalidateQueries({ queryKey: ['mes-reservations'] });
+   })
+   .subscribe();
+  return () => { void supabase.removeChannel(channel); };
+ }, [queryClient]);
  return <JourneyShell><h1 className="mb-8 text-3xl font-bold">Mes réservations</h1>
   {q.isPending && <p role="status" className="text-muted-foreground">Chargement de vos réservations…</p>}
   {q.isError && <div role="alert" className="space-y-3 rounded-xl border border-border p-5"><p>Impossible de charger vos réservations : {q.error.message}</p><Button variant="secondary" onClick={() => void q.refetch()}>Réessayer</Button></div>}
