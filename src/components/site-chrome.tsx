@@ -80,7 +80,7 @@ export function SiteFooter() {
     <div className="mx-auto grid max-w-[1280px] gap-10 px-5 py-12 sm:grid-cols-2 sm:px-8 lg:grid-cols-[1.15fr_1.3fr_1fr] lg:gap-8">
       <div><Brand /><p className="mt-4 max-w-64 text-sm leading-relaxed text-muted-foreground">La plateforme de location d’équipements vélo et outdoor entre familles citadines pour barouder l’esprit tranquille.</p></div>
       <div className="min-w-0"><h2 className="text-sm font-semibold">Guides vélo par âge</h2><ul className="mt-4 space-y-2.5">{kitLinks.map(label => <li key={label}><KitFooterLink label={label} /></li>)}<li><a href={guideDownload.url} download="Guide-du-parent-cycliste.pdf" className={footerLink}>Guide du parent cycliste <span className="whitespace-nowrap">(PDF)</span></a></li></ul></div>
-      <div className="min-w-0"><h2 className="text-sm font-semibold">Confiance</h2><ul className="mt-4 space-y-2.5"><li><Link to="/" hash="pourquoi" className={footerLink}>Pourquoi Mini Vadrouille ?</Link></li></ul></div>
+      <div className="min-w-0"><h2 className="text-sm font-semibold">Confiance</h2><ul className="mt-4 space-y-2.5"><li><Link to="/" hash="pourquoi" className={footerLink}>Pourquoi Mini Vadrouille ?</Link></li><li><Link to="/aide" className={footerLink}>Guide d'utilisation</Link></li><li><Link to="/confidentialite" className={footerLink}>Conditions d'utilisation et confidentialité</Link></li></ul></div>
     </div>
     <div className="mx-auto flex max-w-[1280px] flex-col gap-3 border-t border-border px-5 py-6 text-sm text-muted-foreground sm:flex-row sm:justify-between sm:px-8"><p>© 2026 Mini Vadrouille SAS. Tous droits réservés.</p><p>Conçu avec soin pour les Mini Vadrouilleurs.</p></div>
   </footer>;
