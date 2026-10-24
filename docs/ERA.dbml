@@ -1,0 +1,187 @@
+// Schéma de la base Supabase de Mini Vadrouille, au format DBML (dbdiagram.io).
+// Source : docs/ERA.md, établi à partir de src/integrations/supabase/types.ts.
+// Les types SQL sont déduits des types TypeScript : à confirmer dans le Table Editor de Supabase.
+// Pour obtenir le diagramme : coller ce fichier dans dbdiagram.io, puis Export > PNG ou PDF.
+
+Table profils {
+  id uuid [pk, note: 'lié à auth.users de Supabase Auth (à confirmer)']
+  prenom text
+  nom text
+  role role_utilisateur
+  telephone text
+  ville text
+  presentation text
+  avatar_url text
+  stripe_compte_connect_id text
+  cree_le timestamptz
+  derniere_connexion_le timestamptz
+  anonymise_le timestamptz
+}
+
+Table kits {
+  id uuid [pk]
+  proprietaire_id uuid [not null]
+  relu_par_id uuid
+  nom text
+  teaser text
+  recit_complet text
+  tranche_age tranche_age
+  age_min_mois int
+  age_max_mois int
+  nombre_places int
+  prix_jour numeric
+  caution_montant numeric
+  option_serenite_montant numeric
+  charge_max_kg int
+  duree_max_jours int
+  ville text
+  quartier text
+  contenu_kit text
+  compatibilite text
+  conseil_pratique text
+  conformite_en15918_declaree boolean
+  disponibilite disponibilite_kit
+  statut_relecture statut_relecture
+  relu_le timestamptz
+  cree_le timestamptz
+  mis_a_jour_le timestamptz
+}
+
+Table adresses_kits {
+  kit_id uuid [pk]
+  adresse text
+  complement text
+  code_postal text
+  ville text
+}
+
+Table photos_kits {
+  id uuid [pk]
+  kit_id uuid [not null]
+  chemin_stockage text
+  position int
+  cree_le timestamptz
+}
+
+Table dates_bloquees {
+  id uuid [pk]
+  kit_id uuid [not null]
+  debut_le timestamptz
+  fin_le timestamptz
+  motif text
+  cree_le timestamptz
+}
+
+Table reservations {
+  id uuid [pk]
+  kit_id uuid [not null]
+  locataire_id uuid [not null]
+  reference text
+  statut statut_reservation
+  debut_le timestamptz
+  fin_le timestamptz
+  nombre_jours int
+  prix_jour_applique numeric
+  montant_location numeric
+  frais_service_taux numeric
+  frais_service_montant numeric
+  caution_montant numeric
+  statut_caution statut_caution
+  option_serenite boolean
+  option_serenite_montant numeric
+  total_debite numeric
+  stripe_payment_intent_id text
+  message text
+  creneau_remise_le timestamptz
+  demande_le timestamptz
+  reponse_limite_le timestamptz
+  repondu_le timestamptz
+  annulation_gratuite_jusqu_au timestamptz
+  annulee_le timestamptz
+  motif_annulation text
+  motif_legitime_valide boolean
+  caution_remboursee_le timestamptz
+  cree_le timestamptz
+  mis_a_jour_le timestamptz
+}
+
+Table avis {
+  id uuid [pk]
+  reservation_id uuid [not null]
+  auteur_id uuid
+  note int
+  commentaire text
+  sens sens_avis
+  cree_le timestamptz
+}
+
+Table demandes_suppression {
+  id uuid [pk]
+  profil_id uuid [not null]
+  statut statut_suppression
+  demandee_le timestamptz
+  echeance_le timestamptz
+  traitee_le timestamptz
+  email_confirmation_envoye_le timestamptz
+  email_bilan_envoye_le timestamptz
+}
+
+Enum role_utilisateur {
+  client
+  vendeur
+  admin
+}
+
+Enum tranche_age {
+  petit_cocon
+  explorateur_curieux
+  mini_baroudeur
+}
+
+Enum disponibilite_kit {
+  disponible
+  en_reparation
+}
+
+Enum statut_relecture {
+  en_attente_relecture
+  publie
+  refuse
+}
+
+Enum statut_reservation {
+  en_attente
+  acceptee
+  refusee
+  expiree
+  annulee_par_locataire
+  annulee_par_loueur
+}
+
+Enum statut_caution {
+  encaissee
+  remboursee
+  retenue
+}
+
+Enum sens_avis {
+  locataire_vers_loueur
+  loueur_vers_locataire
+}
+
+Enum statut_suppression {
+  recue
+  en_attente_fin_reservation
+  traitee
+}
+
+Ref: kits.proprietaire_id > profils.id
+Ref: kits.relu_par_id > profils.id
+Ref: adresses_kits.kit_id - kits.id
+Ref: photos_kits.kit_id > kits.id
+Ref: dates_bloquees.kit_id > kits.id
+Ref: reservations.kit_id > kits.id
+Ref: reservations.locataire_id > profils.id
+Ref: avis.reservation_id > reservations.id
+Ref: avis.auteur_id > profils.id
+Ref: demandes_suppression.profil_id > profils.id
