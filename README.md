@@ -47,8 +47,9 @@ Les personas (simulés) : **Chloé**, locataire, persona principale ; **Thomas**
 - Fiche détaillée d'un kit : galerie, équipement, compatibilité, conseils du loueur, total avec option sérénité.
 - Inscription (avec acceptation des CGU), connexion et déconnexion, via Supabase Auth.
 - Demande de réservation avec paiement Stripe en mode test.
-- « Mes réservations » : la locataire ne voit que les siennes, avec leur statut.
+- « Mes réservations » : la locataire ne voit que les siennes, avec leur statut. La liste se met à jour en direct, sans recharger la page (Supabase Realtime).
 - Guide du parent cycliste téléchargeable (PDF).
+- Guide d'utilisation (`/aide`) et page « Conditions d'utilisation et confidentialité » (`/confidentialite`), liées depuis le pied de page et la case d'inscription.
 - **Aide à la compatibilité par IA** : sur la fiche du kit de Thomas, la locataire connectée décrit son vélo (500 caractères maximum) et reçoit une réponse **informative, jamais affirmative**, à confirmer avec le loueur. L'IA s'appuie uniquement sur la fiche de compatibilité du kit ; sans fiche, elle répond « information non disponible ». Code : `supabase/functions/compatibilite-velo/`.
 - **Automatisation** : une tâche `pg_cron` (toutes les heures) passe en « expirée » les demandes de réservation restées sans réponse après 24 h. Code : `supabase/cron-expiration-demandes.sql`.
 
@@ -145,6 +146,8 @@ Prix de démonstration : 3 jours × 22 € = 66 €, plus **10 % de frais de ser
 |---|---|
 | [`docs/Note-de-cadrage-mini-vadrouille.md`](docs/Note-de-cadrage-mini-vadrouille.md) | Problème, proposition de valeur, personas, objectifs SMART, périmètre MVP, grille de stack, risques |
 | [`docs/ERA.md`](docs/ERA.md) | Diagramme entité-relation de la base Supabase (8 tables) |
+| [`docs/ERA-dbdiagram.png`](docs/ERA-dbdiagram.png) | Même diagramme, exporté depuis dbdiagram.io (source : [`docs/ERA.dbml`](docs/ERA.dbml)) |
+| [`docs/RGPD.md`](docs/RGPD.md) | Données personnelles : collecte, sous-traitants, durées de conservation, état de mise en œuvre |
 | [`docs/RLS.md`](docs/RLS.md) | Règles de sécurité des données, table par table |
 | [`docs/AUDIT-SECURITE.md`](docs/AUDIT-SECURITE.md) | Audit de sécurité : constats, limites assumées, plan de remédiation après la soutenance |
 | [`docs/TESTS-EXPLORATION.md`](docs/TESTS-EXPLORATION.md) | Tests exploratoires du site en production (« utilisateur curieux ») |
@@ -176,15 +179,14 @@ Ces points sont assumés et expliqués ici pour ne rien cacher :
 - **Aide IA limitée** : seule la fiche de compatibilité du kit de Thomas est renseignée, et il n'y a pas de quota par utilisateur (limites du plan gratuit de Groq : environ 1 000 requêtes par jour). La messagerie entre locataire et loueur est hors V1 : le « mot pour le loueur » et la remise en main propre couvrent la coordination.
 - **Dates de recherche** : elles ne filtrent pas les kits, car les réservations des autres utilisateurs ne sont volontairement pas lisibles.
 - **Données en dur dans le code** : notes, nombres d'avis, textes et prénoms des loueurs, et photos des kits (`src/data/kits.ts`). Ce sont des textes fictifs de démonstration.
-- **Pas de Supabase Realtime** pour l'instant.
 - Base Supabase sur le plan gratuit : elle peut se mettre en pause après une semaine d'inactivité.
 
 ## Prochaines étapes
 
 - Corrections de l'[audit de sécurité](docs/AUDIT-SECURITE.md) : webhook Stripe, quota IA par utilisateur, mise à jour des dépendances de développement, restriction des origines autorisées (CORS) de la fonction de paiement.
 - Fiches de compatibilité pour les autres kits.
-- Documentation utilisateur et page de confidentialité.
-- Une vue de suivi dynamique des réservations (Supabase Realtime).
+- Un tableau de bord de suivi (réservations par statut, par kit) réservé à un rôle administrateur.
+- Bouton de demande de suppression de compte dans l'interface et e-mails automatiques (confirmation, bilan).
 
 ## Historique du projet
 
