@@ -1,6 +1,6 @@
 # Sécurité des données : règles RLS de Mini Vadrouille
 
-> **Statut de ce document.** Ces règles proviennent du travail de conception réalisé en amont avec Claude (conversations « Supabase » et « Supabase 2 », fichier de suivi du projet). Elles ont été testées sur un Postgres local puis appliquées au projet Supabase. **Elles n'ont pas été relues ni vérifiées depuis ce dépôt** : la preuve à montrer au jury est la page des politiques du tableau de bord Supabase, et la démonstration à deux comptes décrite en bas de page.
+> **Statut de ce document.** Ces règles proviennent du travail de conception réalisé en amont avec Claude (conversations « Supabase » et « Supabase 2 », fichier de suivi du projet). Elles ont été testées sur un Postgres local puis appliquées au projet Supabase. **Vérification du 25 octobre 2026 dans le projet Supabase en production** : la RLS est activée (`rowsecurity = true`) sur les 8 tables du schéma `public`, et la liste des politiques correspond exactement au tableau ci-dessous (cinq politiques de lecture : deux sur `kits`, une sur `photos_kits`, une sur `profils`, une sur `reservations` ; aucune politique d'écriture). Les captures sont conservées avec les preuves du projet ; la démonstration à deux comptes est décrite en bas de page.
 
 ## L'idée en une phrase
 
@@ -49,7 +49,7 @@ La RLS est activée sur les **8 tables**. Seules **4 tables sont exposées** dan
 
 ## Preuves à préparer pour le jury
 
-- [ ] Capture du tableau de bord Supabase montrant la RLS activée sur les 8 tables et la liste des politiques.
+- [x] Résultats des requêtes sur le projet Supabase (25/10) : RLS activée sur les 8 tables (`pg_tables.rowsecurity`) et liste des cinq politiques (`pg_policies`).
 - [ ] Démonstration à deux comptes : un premier compte voit **ses** réservations, un second compte voit une **liste vide** (même page, mêmes requêtes).
-- [ ] Démonstration qu'un visiteur non connecté ne peut pas lire `profils` ni `reservations`.
+- [x] Visiteur non connecté (test du 25/10 sur l'API de production, avec la seule clé publique du site) : `reservations` et `profils` renvoient une liste vide, `kits` ne renvoie que les kits publiés, et `adresses_kits`, `dates_bloquees`, `demandes_suppression` et `avis` refusent l'accès (« permission denied »).
 - [ ] Capture des variables d'environnement côté Vercel (aucune clé secrète) et des Secrets côté Supabase.
