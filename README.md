@@ -69,7 +69,7 @@ Les personas (simulés) : **Chloé**, locataire, persona principale ; **Thomas**
 | Base de données et authentification | [Supabase](https://supabase.com) (PostgreSQL, Auth, Edge Functions) |
 | Paiement | [Stripe](https://stripe.com) (Connect, mode test), appelé depuis une Edge Function Supabase |
 | Éditeur et assistant | VS Code et Claude Code |
-| Versionnement | GitHub (dépôt privé) |
+| Versionnement | GitHub |
 | Intelligence artificielle | [Groq](https://groq.com) (plan gratuit, modèle ouvert `openai/gpt-oss-120b`), appelé depuis une Edge Function Supabase ; clé dans les Secrets Supabase |
 | Automatisation | `pg_cron` (extension PostgreSQL de Supabase) |
 | Hébergement | [Vercel](https://vercel.com), déploiement automatique à chaque `git push` sur `main` |
